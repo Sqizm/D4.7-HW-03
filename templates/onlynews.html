@@ -1,0 +1,21 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% load censor_filter %}
+
+<!-- Название у нас будет OnlyNews -->
+{% block title %}
+OnlyNews
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим заголовок, дату публикации, категорию и само описание, идентификатор которого был передан в url -->
+{% block content %}
+<h1>{{ onlynews.name|censor }}</h1>
+<hr>
+<h5>Дата публикации: {{ onlynews.dateCreate|date:"d.m.Y | H:i" }}</h5>
+<h5>Тип поста: {{ onlynews.category.name }}</h5>
+<h5>Категория: {{ onlynews.genre }}</h5>
+<hr>
+<p>{{ onlynews.description|censor }}</p>
+<hr>
+{% endblock content %}
