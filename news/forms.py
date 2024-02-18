@@ -7,7 +7,7 @@ class NewsForm(forms.ModelForm):
         model = News
         fields = ['name', 'genre', 'description']
         labels = {
-            'name': 'Название заголовка новости',
+            'name': 'Название заголовка',
             'genre': 'Категория',
             'description': 'Описание'
         }

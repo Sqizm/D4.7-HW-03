@@ -1,5 +1,6 @@
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from .models import News, Category
 from .filters import NewsFilter
 from .forms import NewsForm
@@ -58,9 +59,18 @@ class NewsSearch(ListView):
 
 
 # Класс создать новость/статью
-class NewsCreate(CreateView):
+class NewsCreate(PermissionRequiredMixin, CreateView):
+    raise_exception = True
     form_class = NewsForm
     model = News
+
+    def get_permission_required(self):
+        if self.request.path == '/news/create/':
+            return ['news.add_news']
+        elif self.request.path == '/articles/create/':
+            return ['news.add_news']
+        else:
+            return super().get_permission_required
 
     def get_template_names(self):
         if self.request.path == '/news/create/':
@@ -82,9 +92,18 @@ class NewsCreate(CreateView):
 
 
 # Класс редактировать новость/статью
-class NewsUpdate(UpdateView):
+class NewsUpdate(PermissionRequiredMixin, UpdateView):
+    raise_exception = True
     form_class = NewsForm
     model = News
+
+    def get_permission_required(self):
+        if self.request.path == reverse('news_update', kwargs={'pk': self.kwargs['pk']}):
+            return ['news.change_news']
+        elif self.request.path == reverse('articles_update', kwargs={'pk': self.kwargs['pk']}):
+            return ['news.change_news']
+        else:
+            return super().get_permission_required()
 
     def get_template_names(self):
         if self.request.path == reverse('news_update', kwargs={'pk': self.kwargs['pk']}):
@@ -96,8 +115,17 @@ class NewsUpdate(UpdateView):
 
 
 # Класс удалить новость/статью
-class NewsDelete(DeleteView):
+class NewsDelete(PermissionRequiredMixin, DeleteView):
+    raise_exception = True
     model = News
+
+    def get_permission_required(self):
+        if self.request.path == reverse('news_delete', kwargs={'pk': self.kwargs['pk']}):
+            return ['news.delete_news']
+        elif self.request.path == reverse('articles_delete', kwargs={'pk': self.kwargs['pk']}):
+            return ['news.delete_news']
+        else:
+            return super().get_permission_required()
 
     def get_template_names(self):
         if self.request.path == reverse('news_delete', kwargs={'pk': self.kwargs['pk']}):
