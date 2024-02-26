@@ -166,8 +166,8 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'    # не пускает пользов
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
 
 # Настройка работы с Yandex-почтой
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # На элек. почту
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'    # В консоль
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # На элек. почту
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'    # В консоль
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = os.getenv('EMAIL')
