@@ -1,12 +1,16 @@
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from .models import News, Category
+from django.contrib.auth.decorators import login_required
+from django.db.models import Exists, OuterRef
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
+from .models import News, Category, Subscriber
 from .filters import NewsFilter
 from .forms import NewsForm
 
 
-# Класс список всех новостей.
+# Класс представления список всех новостей.
 class NewsList(ListView):
     # Указываем модель, объекты которой мы будем выводить
     model = News
@@ -28,7 +32,7 @@ class NewsList(ListView):
     paginate_by = 10
 
 
-# Класс только одна новость.
+# Класс представления только одна новость.
 class NewsDetail(DetailView):
     # Модель всё та же, но мы хотим получать информацию по отдельной новости
     model = News
@@ -40,7 +44,7 @@ class NewsDetail(DetailView):
     context_object_name = 'onlynews'
 
 
-# Класс поиск
+# Класс представления поиск
 class NewsSearch(ListView):
     model = News
     template_name = 'news_search.html'
@@ -58,7 +62,7 @@ class NewsSearch(ListView):
         return context
 
 
-# Класс создать новость/статью
+# Класс представления создать новость/статью
 class NewsCreate(PermissionRequiredMixin, CreateView):
     raise_exception = True
     form_class = NewsForm
@@ -85,13 +89,17 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
         if self.request.path == '/news/create/':
             category = Category.objects.get(name='Новость')
             news.category = category
-        if self.request.path == '/articles/create/':
+            news.save()  # Сохраняю обьект news для получения значения id
+            news.postCategory.add(category)  # Добавляю категорию в поле многие ко многим. Для сигнала отправ. уведом.
+        elif self.request.path == '/articles/create/':
             category = Category.objects.get(name='Статья')
             news.category = category
+        else:
+            news.save()  # Просто сохраняю обьект news
         return super().form_valid(form)
 
 
-# Класс редактировать новость/статью
+# Класс представления редактировать новость/статью
 class NewsUpdate(PermissionRequiredMixin, UpdateView):
     raise_exception = True
     form_class = NewsForm
@@ -114,7 +122,7 @@ class NewsUpdate(PermissionRequiredMixin, UpdateView):
             return super().get_template_names()
 
 
-# Класс удалить новость/статью
+# Класс представления удалить новость/статью
 class NewsDelete(PermissionRequiredMixin, DeleteView):
     raise_exception = True
     model = News
@@ -136,3 +144,35 @@ class NewsDelete(PermissionRequiredMixin, DeleteView):
             return super().get_template_names()
 
     success_url = reverse_lazy('news')
+
+
+# Класс представления подписки
+@login_required
+@csrf_protect
+def subscriptions(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Category.objects.get(id=category_id)
+        action = request.POST.get('action')
+
+        if action == 'subscribe':
+            Subscriber.objects.create(user=request.user, category=category)
+        elif action == 'unsubscribe':
+            Subscriber.objects.filter(
+                user=request.user,
+                category=category,
+            ).delete()
+
+    categories_with_subscriptions = Category.objects.annotate(
+        user_subscribed=Exists(
+            Subscriber.objects.filter(
+                user=request.user,
+                category=OuterRef('pk'),
+            )
+        )
+    ).order_by('name')
+    return render(
+        request,
+        'subscriptions.html',
+        {'categories': categories_with_subscriptions},
+    )

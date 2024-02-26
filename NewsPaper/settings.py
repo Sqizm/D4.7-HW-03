@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 
 from pathlib import Path
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +54,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
+    "django_apscheduler",
 
 ]
 
@@ -157,6 +161,30 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'    # не пускает пользователя на сайт до момента подтверждения почты
 
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
+
+# Настройка работы с Yandex-почтой
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # На элек. почту
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'    # В консоль
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = os.getenv('EMAIL')
+EMAIL_HOST_PASSWORD = os.getenv('HOST_PASSWORD')
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL')
+
+# Рассылка менеджерам и администраторам
+SERVER_EMAIL = os.getenv('EMAIL')
+MANAGERS = (
+    ('Никита', os.getenv('EMAIL')),
+)
+
+ADMINS = (
+    ('Никита', os.getenv('EMAIL')),
+)
+
+EMAIL_SUBJECT_PREFIX = '[NEW USER]'  # Префикс в начале темы письма. Когда зарег. новый пользователь.
