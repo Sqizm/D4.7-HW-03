@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_protect
 from .models import News, Category, Subscriber
 from .filters import NewsFilter
 from .forms import NewsForm
+from .tasks import notify_subscribers_task
 
 
 # Класс представления список всех новостей.
@@ -91,6 +92,7 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
             news.category = category
             news.save()  # Сохраняю обьект news для получения значения id
             news.postCategory.add(category)  # Добавляю категорию в поле многие ко многим. Для сигнала отправ. уведом.
+            notify_subscribers_task(news.id)  # Вызываю задачу отправ. уведомл. теперь от Celery.
         elif self.request.path == '/articles/create/':
             category = Category.objects.get(name='Статья')
             news.category = category

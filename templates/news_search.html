@@ -28,7 +28,7 @@ News_List
            <!-- Применяем цикл for, проходимся по всем новостям и выводим. -->
            {% for onenw in news_list %}
            <li>
-               <strong>Тип поста: </strong>{{ onenw.category.name }}<br>
+               <h5><strong><a href="{% url 'onlynews' pk=onenw.id %}">{{ onenw.category.name }} №{{ onenw.id }}</a></strong></h5><br>
                <strong>Заголовок: </strong>{{ onenw.name|censor }}<br>
                <!-- Дата публикации в формате день.месяц.год -->
                <strong>Дата публикации: </strong>{{ onenw.dateCreate|date:"d.m.Y | H:i" }}<br>

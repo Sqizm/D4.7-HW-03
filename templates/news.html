@@ -9,7 +9,7 @@ News
 {% endblock title %}
 
 {% block content %}
-   <h1>Все посты</h1>
+<h1>Все посты</h1>
     <h5>Общее кол-во: {{news|length}}</h5>
    <hr>
     {% if perms.news.add_news %}
@@ -17,30 +17,31 @@ News
         <a href="{% url 'articles_create' %}">Добавить статью</a>
         <hr>
     {% endif %}
-   {% if news %}
-       <!-- Все новости выводятся списком, спец. тегом -->
-       <ul>
-           <!-- Применяем цикл for, проходимся по всем новостям и выводим. -->
-           {% for onenw in news %}
-           <li>
-               <strong>Тип поста: </strong>{{ onenw.category.name }}<br>
-               <strong>Заголовок: </strong>{{ onenw.name|censor }}<br>
-               <!-- Дата публикации в формате день.месяц.год -->
-               <strong>Дата публикации: </strong>{{ onenw.dateCreate|date:"d.m.Y | H:i" }}<br>
-               <!-- Основной текст выводит только первые 20 символов и многоточие. -->
-               <strong>Описание: </strong>{{ onenw.description|truncatechars:20|censor }}<br>
-               <strong>Категория: </strong>{{ onenw.genre }}<br>
-               {% if perms.news.add_news %}
-                    <strong>Действие: </strong><a href="{% url 'news_update' pk=onenw.id %}">Редактировать</a>
-               {% endif %}
-               <!-- Пустой тег для текста, своего рода отступ. -->
-               <p>
-           </li>
-           {% endfor %}
-       </ul>
-   {% else %}
-       <h2>Пусто!</h2>
-   {% endif %}
+        {% if news %}
+        <!-- Все новости выводятся списком, спец. тегом -->
+        <ul>
+            <!-- Применяем цикл for, проходимся по всем новостям и выводим. -->
+            {% for onenw in news %}
+                <li>
+                    <h5><strong><a href="{% url 'onlynews' pk=onenw.id %}">{{ onenw.category.name }} №{{ onenw.id }}</a></strong></h5><br>
+                    <strong>Заголовок: </strong>{{ onenw.name|censor }}<br>
+                    <!-- Дата публикации в формате день.месяц.год -->
+                    <strong>Дата публикации: </strong>{{ onenw.dateCreate|date:"d.m.Y | H:i" }}<br>
+                    <!-- Основной текст выводит только первые 20 символов и многоточие. -->
+                    <strong>Описание: </strong>{{ onenw.description|truncatechars:20|censor }}<br>
+                    <strong>Категория: </strong>{{ onenw.genre }}<br>
+                    {% if perms.news.add_news %}
+                        <strong>Действие: </strong><a href="{% url 'news_update' pk=onenw.id %}">Редактировать</a>
+                    {% endif %}
+                    <!-- Пустой тег для текста, своего рода отступ. -->
+                    <p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <h2>Пусто!</h2>
+    {% endif %}
+
     {# Информация о предыдущих страницах #}
    {% if page_obj.has_previous %}
        <a href="?{% url_replace page=1 %}">1</a>
