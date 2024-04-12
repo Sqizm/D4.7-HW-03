@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
+# from django.core.cache import cache
 
 
 # Модель 'Пост'
@@ -33,6 +34,14 @@ class News(models.Model):
 
     def get_absolute_url(self):
         return reverse('onlynews', args=[str(self.id)])
+
+    # def save(self, *args, **kwargs):
+    #     if self.category.name == 'Статья':
+    #         cache_key = f'onlynews_{self.id}'
+    #         previous_article_id = cache.get(cache_key)
+    #         if previous_article_id is None or self.id != previous_article_id:
+    #             cache.set(cache_key, self.id, timeout=None)
+    #     super(News, self).save(*args, **kwargs)
 
 
 # Модель 'Пост Категория'

@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
+# from django.views.decorators.cache import cache_page # импортируем декоратор для кэширования отдельного представления
+# from django.core.cache import cache # импортируем наш кэш
 from .models import News, Category, Subscriber
 from .filters import NewsFilter
 from .forms import NewsForm
