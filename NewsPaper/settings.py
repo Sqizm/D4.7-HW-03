@@ -217,18 +217,40 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(pathname)s %(message)s %(exc_info)s'
+        # DEBUG - время, уровень сообщ., сообщение.
+        'verbose_d': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
         },
+        # WARNING - время, уровень сообщ., сообщение, путь.
+        'verbose_w': {
+            'format': '%(asctime)s %(levelname)s %(message)s %(pathname)s'
+        },
+        # ERROR - время, уровень сообщ., сообщение, путь, стэк.
+        'verbose_e': {
+            'format': '%(asctime)s %(levelname)s %(message)s %(pathname)s %(exc_info)s'
+        },
+        # INFO - время, уровень сообщ., модуль, сообщение.
         'simple': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
         },
     },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'verbose_d',
+            'filters': ['require_debug_true']
+        },
+        'console_warning': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose_w',
+            'filters': ['require_debug_true']
+        },
+        'console_error': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose_e',
             'filters': ['require_debug_true']
         },
         'general_file': {
@@ -242,25 +264,24 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': 'errors.log',
-            'formatter': 'verbose',
-            'filters': ['errors_only']
+            'formatter': 'verbose_e',
         },
         'security_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'security.log',
             'formatter': 'simple',
-            'filters': ['security_only']
         },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-            'filters': ['mail_only']
+            'formatter': 'verbose_w',
+            'filters': ['require_debug_false']
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'general_file', 'errors_file', 'mail_admins'],
+            'handlers': ['console', 'console_warning', 'console_error', 'general_file'],
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -271,6 +292,16 @@ LOGGING = {
         },
         'django.server': {
             'handlers': ['errors_file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['errors_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['errors_file'],
             'level': 'ERROR',
             'propagate': False,
         },
@@ -286,18 +317,6 @@ LOGGING = {
         },
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'errors_only': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': lambda record: record.levelno >= logging.ERROR,
-        },
-        'security_only': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': lambda record: record.name == 'django.security',
-        },
-        'mail_only': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': lambda record: record.levelno >= logging.ERROR
         },
     },
 }
